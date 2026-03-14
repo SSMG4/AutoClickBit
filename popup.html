@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AutoClickBit</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="9" stroke="#e84040" stroke-width="1.5"/>
+        <line x1="10" y1="1" x2="10" y2="4.5" stroke="#e84040" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="10" y1="15.5" x2="10" y2="19" stroke="#e84040" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="1" y1="10" x2="4.5" y2="10" stroke="#e84040" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="15.5" y1="10" x2="19" y2="10" stroke="#e84040" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="10" cy="10" r="3" fill="#e84040"/>
+      </svg>
+      <span class="logo-text">AutoClickBit</span>
+    </div>
+    <div class="header-actions">
+      <div class="run-indicator" id="runIndicator"></div>
+      <button class="start-btn" id="startBtn" title="Start / stop all targets">
+        <svg id="startIcon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M5 3.5 L13 8 L5 12.5 Z" fill="currentColor"/>
+        </svg>
+      </button>
+      <button class="master-btn" id="masterBtn" title="Add target">
+        <svg id="masterIcon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <line x1="8" y1="1" x2="8" y2="5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="8" y1="11" x2="8" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="1" y1="8" x2="5" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="11" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="8" cy="8" r="2.5" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="tab active" data-tab="click">Click</button>
+    <button class="tab" data-tab="targets">Targets</button>
+    <button class="tab" data-tab="advanced">Advanced</button>
+    <button class="tab" data-tab="stats">Stats</button>
+  </nav>
+
+  <main>
+
+    <section class="panel active" id="tab-click">
+
+      <div class="row-label">Action</div>
+      <div class="seg-group" id="actionModeGroup">
+        <button class="seg active" data-v="mouse">Mouse</button>
+        <button class="seg" data-v="key">Keyboard</button>
+      </div>
+
+      <div id="mouseOptions">
+        <div class="row-label" style="margin-top:10px;">Click type</div>
+        <div class="seg-group" id="clickTypeGroup">
+          <button class="seg active" data-v="left"   title="Left click">Left</button>
+          <button class="seg"        data-v="right"  title="Right click">Right</button>
+          <button class="seg"        data-v="middle" title="Middle click">Middle</button>
+          <button class="seg"        data-v="double" title="Double click">Double</button>
+        </div>
+      </div>
+
+      <div id="keyOptions" style="display:none;">
+        <div class="row-label" style="margin-top:10px;">Key to press</div>
+        <div class="key-bind-row">
+          <input class="key-input" id="keyInput" type="text" value="Space" readonly placeholder="Click to bind…">
+          <button class="btn-sm" id="clearKeyBtn">Clear</button>
+        </div>
+        <p class="hint">Click the field, then press any key.</p>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="field-header">
+          <div class="row-label">Interval</div>
+          <div class="seg-group" id="inputModeGroup">
+            <button class="seg active" data-v="ms">ms</button>
+            <button class="seg"        data-v="cps">CPS</button>
+          </div>
+        </div>
+        <div class="interval-row">
+          <button class="nudge" id="iDown">−</button>
+          <input class="num-input" id="intervalInput" type="number" min="1" max="60000" value="100">
+          <button class="nudge" id="iUp">+</button>
+        </div>
+        <input class="slider" id="intervalSlider" type="range" min="1" max="2000" value="100">
+        <div class="interval-warn" id="intervalWarn">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+            <path d="M5.5 1L10 10H1L5.5 1Z" stroke="#f59e0b" stroke-width="1.2" stroke-linejoin="round"/>
+            <line x1="5.5" y1="4.5" x2="5.5" y2="7" stroke="#f59e0b" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="5.5" cy="8.5" r="0.6" fill="#f59e0b"/>
+          </svg>
+          Interval below 40ms — may cause browser slowdown
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="field-header">
+          <div class="row-label">Jitter</div>
+          <span class="field-val" id="jitterVal">0%</span>
+        </div>
+        <input class="slider orange" id="jitterSlider" type="range" min="0" max="100" value="0">
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="row-label">Repeat</div>
+        <div class="repeat-row">
+          <button class="seg active" id="rptInf">∞ Infinite</button>
+          <button class="seg"        id="rptFixed">Fixed</button>
+          <input class="num-input sm" id="rptCount" type="number" min="1" value="100" disabled>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="field-header">
+          <div class="row-label">Hold duration</div>
+          <span class="field-val" id="holdVal">off</span>
+        </div>
+        <input class="slider purple" id="holdSlider" type="range" min="0" max="2000" step="10" value="0">
+      </div>
+
+    </section>
+
+    <section class="panel" id="tab-targets">
+      <div class="targets-bar">
+        <button class="btn-primary" id="addTargetBtn">
+          <svg width="11" height="11" viewBox="0 0 11 11"><line x1="5.5" y1="1" x2="5.5" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="1" y1="5.5" x2="10" y2="5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span id="addTargetLbl">Add Target</span>
+        </button>
+        <button class="btn-ghost" id="clearAllBtn">Clear all</button>
+      </div>
+      <div class="target-list" id="targetList">
+        <div class="empty" id="emptyMsg">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" opacity="0.3">
+            <circle cx="14" cy="14" r="12" stroke="#888" stroke-width="1.5"/>
+            <circle cx="14" cy="14" r="5"  stroke="#888" stroke-width="1.5"/>
+            <line x1="14" y1="2"  x2="14" y2="6"  stroke="#888" stroke-width="1.5"/>
+            <line x1="14" y1="22" x2="14" y2="26" stroke="#888" stroke-width="1.5"/>
+            <line x1="2"  y1="14" x2="6"  y2="14" stroke="#888" stroke-width="1.5"/>
+            <line x1="22" y1="14" x2="26" y2="14" stroke="#888" stroke-width="1.5"/>
+          </svg>
+          <p>No targets.<br>Add one to place a cursor on the page.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-advanced">
+
+      <div style="margin-bottom:10px;">
+        <div class="field-header">
+          <div class="row-label">Burst (clicks/tick)</div>
+          <span class="field-val" id="burstVal">1</span>
+        </div>
+        <input class="slider" id="burstSlider" type="range" min="1" max="20" value="1">
+      </div>
+
+      <div class="row-label">Global hotkey</div>
+      <div class="hotkey-row">
+        <input class="hotkey-input" id="hotkeyInput" type="text" value="F8" readonly placeholder="Click to bind…">
+        <button class="btn-sm" id="clearHotkeyBtn">Clear</button>
+      </div>
+      <p class="hint">Click the field, then press any key or combo.</p>
+
+      <div class="toggle-list">
+        <label class="toggle-row">
+          <div>
+            <div class="tgl-label">Humanize jitter</div>
+            <div class="tgl-desc">Gaussian distribution</div>
+          </div>
+          <input type="checkbox" id="humanizeChk">
+          <span class="tgl-track"></span>
+        </label>
+        <label class="toggle-row">
+          <div>
+            <div class="tgl-label">Ignore invisible elements</div>
+            <div class="tgl-desc">Skip hidden / zero-size targets</div>
+          </div>
+          <input type="checkbox" id="ignoreHiddenChk" checked>
+          <span class="tgl-track"></span>
+        </label>
+        <label class="toggle-row">
+          <div>
+            <div class="tgl-label">Click sound</div>
+            <div class="tgl-desc">Subtle tick via Web Audio</div>
+          </div>
+          <input type="checkbox" id="soundFxChk">
+          <span class="tgl-track"></span>
+        </label>
+      </div>
+
+      <button class="btn-danger wide" id="resetBtn" style="margin-top:12px;">Reset all settings</button>
+
+    </section>
+
+    <section class="panel" id="tab-stats">
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-num" id="sTotalClicks">0</div>
+          <div class="stat-lbl">Total Clicks</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="sCPS">0.0</div>
+          <div class="stat-lbl">Live CPS</div>
+        </div>
+        <div class="stat wide">
+          <div class="stat-num mono" id="sTime">00:00:00</div>
+          <div class="stat-lbl">Session Time</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="sTargets">0</div>
+          <div class="stat-lbl">Active Targets</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num mono" id="sInterval">—</div>
+          <div class="stat-lbl">Interval</div>
+        </div>
+      </div>
+      <button class="btn-danger wide" id="resetStatsBtn" style="margin-top:14px;">Reset stats</button>
+    </section>
+
+  </main>
+
+  <footer>
+    <span id="footerTxt" class="footer-txt">Idle</span>
+    <a href="https://github.com/SSMG4/AutoClickBit" target="_blank" class="footer-link">GPL-3.0 · GitHub</a>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
