@@ -1,0 +1,41 @@
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+*.swo
+*~
+
+# web-ext
+web-ext-artifacts/
+.web-ext-cache/
+
+# Local packaging output
+*.zip
+*.xpi
+*.crx
+
+# Node (if you guys use web-ext or cairosvg locally via node)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Python (cairosvg for icon generation)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
