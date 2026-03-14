@@ -228,26 +228,45 @@ function updateRunUI() {
   updateMasterBtnIcon();
 }
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+function setSVGIcon(svgEl, type) {
+  while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+  if (type === 'pause') {
+    svgEl.appendChild(svgEl_(svgEl,'rect',{x:4,y:4,width:3,height:8,rx:1,fill:'currentColor'}));
+    svgEl.appendChild(svgEl_(svgEl,'rect',{x:9,y:4,width:3,height:8,rx:1,fill:'currentColor'}));
+  } else if (type === 'play') {
+    svgEl.appendChild(svgEl_(svgEl,'path',{d:'M5 3.5 L13 8 L5 12.5 Z',fill:'currentColor'}));
+  } else if (type === 'crosshair') {
+    svgEl.appendChild(svgEl_(svgEl,'line',{x1:8,y1:1,x2:8,y2:5,stroke:'currentColor','stroke-width':1.8,'stroke-linecap':'round'}));
+    svgEl.appendChild(svgEl_(svgEl,'line',{x1:8,y1:11,x2:8,y2:15,stroke:'currentColor','stroke-width':1.8,'stroke-linecap':'round'}));
+    svgEl.appendChild(svgEl_(svgEl,'line',{x1:1,y1:8,x2:5,y2:8,stroke:'currentColor','stroke-width':1.8,'stroke-linecap':'round'}));
+    svgEl.appendChild(svgEl_(svgEl,'line',{x1:11,y1:8,x2:15,y2:8,stroke:'currentColor','stroke-width':1.8,'stroke-linecap':'round'}));
+    svgEl.appendChild(svgEl_(svgEl,'circle',{cx:8,cy:8,r:2.5,fill:'currentColor'}));
+  }
+}
+
+function svgEl_(parent, tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+  return el;
+}
+
 function updateMasterBtnIcon() {
   const isKey = S.actionMode === 'key';
   dom.startBtn.classList.toggle('hidden', isKey);
 
   if (isKey) {
-    if (anyRunning) {
-      dom.masterIcon.innerHTML = `<rect x="4" y="4" width="3" height="8" rx="1" fill="currentColor"/><rect x="9" y="4" width="3" height="8" rx="1" fill="currentColor"/>`;
-    } else {
-      dom.masterIcon.innerHTML = `<path d="M5 3.5 L13 8 L5 12.5 Z" fill="currentColor"/>`;
-    }
+    setSVGIcon(dom.masterIcon, anyRunning ? 'pause' : 'play');
   } else {
-    dom.masterIcon.innerHTML = `
-      <line x1="8" y1="1" x2="8" y2="5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="8" y1="11" x2="8" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="1" y1="8" x2="5" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <line x1="11" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="8" cy="8" r="2.5" fill="currentColor"/>`;
-    dom.startIcon.innerHTML = anyRunning
-      ? `<rect x="4" y="4" width="3" height="8" rx="1" fill="currentColor"/><rect x="9" y="4" width="3" height="8" rx="1" fill="currentColor"/>`
-      : `<path d="M5 3.5 L13 8 L5 12.5 Z" fill="currentColor"/>`;
+    setSVGIcon(dom.masterIcon, 'crosshair');
+    setSVGIcon(dom.startIcon, anyRunning ? 'pause' : 'play');
   }
 }
 
@@ -288,19 +307,46 @@ function makeMouseCard(t, i) {
   const card = document.createElement('div');
   card.className = 'tcard' + (t.active ? '' : ' inactive');
   card.dataset.id = t.id;
-  card.innerHTML = `
-    <div class="tcard-dot" style="background:${t.color}"></div>
-    <div class="tcard-info">
-      <div class="tcard-name">Target ${i + 1}</div>
-      <div class="tcard-meta">${t.x}, ${t.y} px</div>
-    </div>
-    <span class="tcard-clicks">${fmt(t.clickCount)}</span>
-    <div class="tcard-btns">
-      <button class="icon-btn ${t.active ? 'active' : ''}" data-act="toggle">${t.active ? '⏸' : '▶'}</button>
-      <button class="icon-btn rm" data-act="remove">✕</button>
-    </div>`;
-  card.querySelector('[data-act="toggle"]').addEventListener('click', () => msgContent({ type: 'ACB_TOGGLE_ACTIVE', id: t.id }));
-  card.querySelector('[data-act="remove"]').addEventListener('click', () => msgContent({ type: 'ACB_REMOVE_TARGET', id: t.id }));
+
+  const dot = document.createElement('div');
+  dot.className = 'tcard-dot';
+  dot.style.background = t.color;
+
+  const info = document.createElement('div');
+  info.className = 'tcard-info';
+  const name = document.createElement('div');
+  name.className = 'tcard-name';
+  name.textContent = 'Target ' + (i + 1);
+  const meta = document.createElement('div');
+  meta.className = 'tcard-meta';
+  meta.textContent = t.x + ', ' + t.y + ' px';
+  info.appendChild(name);
+  info.appendChild(meta);
+
+  const clicks = document.createElement('span');
+  clicks.className = 'tcard-clicks';
+  clicks.textContent = fmt(t.clickCount);
+
+  const btns = document.createElement('div');
+  btns.className = 'tcard-btns';
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'icon-btn' + (t.active ? ' active' : '');
+  toggleBtn.dataset.act = 'toggle';
+  toggleBtn.textContent = t.active ? '⏸' : '▶';
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'icon-btn rm';
+  removeBtn.dataset.act = 'remove';
+  removeBtn.textContent = '✕';
+  btns.appendChild(toggleBtn);
+  btns.appendChild(removeBtn);
+
+  card.appendChild(dot);
+  card.appendChild(info);
+  card.appendChild(clicks);
+  card.appendChild(btns);
+
+  toggleBtn.addEventListener('click', () => msgContent({ type: 'ACB_TOGGLE_ACTIVE', id: t.id }));
+  removeBtn.addEventListener('click', () => msgContent({ type: 'ACB_REMOVE_TARGET', id: t.id }));
   return card;
 }
 
@@ -308,20 +354,48 @@ function makeKeyCard(t, i) {
   const card = document.createElement('div');
   card.className = 'tcard' + (t.active ? '' : ' inactive');
   card.dataset.id = t.id;
-  const disp = t.key === 'Space' ? '␣ Space' : t.key;
-  card.innerHTML = `
-    <div class="tcard-dot" style="background:${t.color}"></div>
-    <div class="tcard-info">
-      <div class="tcard-name"><span class="key-badge" title="Click to rebind">${disp}</span></div>
-      <div class="tcard-meta">Key target ${i + 1}</div>
-    </div>
-    <span class="tcard-clicks">${fmt(t.clickCount)}</span>
-    <div class="tcard-btns">
-      <button class="icon-btn ${t.active ? 'active' : ''}" data-act="toggle">${t.active ? '⏸' : '▶'}</button>
-      <button class="icon-btn rm" data-act="remove">✕</button>
-    </div>`;
 
-  const badge = card.querySelector('.key-badge');
+  const dot = document.createElement('div');
+  dot.className = 'tcard-dot';
+  dot.style.background = t.color;
+
+  const info = document.createElement('div');
+  info.className = 'tcard-info';
+  const nameDiv = document.createElement('div');
+  nameDiv.className = 'tcard-name';
+  const badge = document.createElement('span');
+  badge.className = 'key-badge';
+  badge.title = 'Click to rebind';
+  badge.textContent = t.key === 'Space' ? '␣ Space' : t.key;
+  nameDiv.appendChild(badge);
+  const meta = document.createElement('div');
+  meta.className = 'tcard-meta';
+  meta.textContent = 'Key target ' + (i + 1);
+  info.appendChild(nameDiv);
+  info.appendChild(meta);
+
+  const clicks = document.createElement('span');
+  clicks.className = 'tcard-clicks';
+  clicks.textContent = fmt(t.clickCount);
+
+  const btns = document.createElement('div');
+  btns.className = 'tcard-btns';
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'icon-btn' + (t.active ? ' active' : '');
+  toggleBtn.dataset.act = 'toggle';
+  toggleBtn.textContent = t.active ? '⏸' : '▶';
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'icon-btn rm';
+  removeBtn.dataset.act = 'remove';
+  removeBtn.textContent = '✕';
+  btns.appendChild(toggleBtn);
+  btns.appendChild(removeBtn);
+
+  card.appendChild(dot);
+  card.appendChild(info);
+  card.appendChild(clicks);
+  card.appendChild(btns);
+
   badge.addEventListener('click', () => {
     if (badge.dataset.rec) return;
     badge.dataset.rec = '1';
@@ -342,8 +416,8 @@ function makeKeyCard(t, i) {
     document.addEventListener('keydown', handler, true);
   });
 
-  card.querySelector('[data-act="toggle"]').addEventListener('click', () => msgContent({ type: 'ACB_TOGGLE_KEY_TARGET', id: t.id }));
-  card.querySelector('[data-act="remove"]').addEventListener('click', () => msgContent({ type: 'ACB_REMOVE_KEY_TARGET', id: t.id }));
+  toggleBtn.addEventListener('click', () => msgContent({ type: 'ACB_TOGGLE_KEY_TARGET', id: t.id }));
+  removeBtn.addEventListener('click', () => msgContent({ type: 'ACB_REMOVE_KEY_TARGET', id: t.id }));
   return card;
 }
 
