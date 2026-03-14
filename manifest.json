@@ -62,5 +62,10 @@
     "gecko_android": {
       "strict_min_version": "120.0"
     }
+  },
+
+  "data_collection_permissions": {
+    "required": [],
+    "optional": []
   }
 }
