@@ -173,20 +173,39 @@ function buildCursorEl(id, x, y, color, index) {
   el.className = 'acb-target acb-cursor';
   el.dataset.acbId = id;
   el.style.cssText = `left:${x}px;top:${y}px;--c:${color};`;
-  el.innerHTML = `
-    <div class="acb-cursor-hover-btns">
-      <button class="acb-hbtn" data-a="play">▶</button>
-      <button class="acb-hbtn" data-a="remove">✕</button>
-    </div>
-    <div class="acb-cursor-body dim">
-      ${cursorSVG(color)}
-      <div class="acb-cursor-label">T${index+1}</div>
-    </div>
-  `;
+
+  const btns = document.createElement('div');
+  btns.className = 'acb-cursor-hover-btns';
+  const playBtn = document.createElement('button');
+  playBtn.className = 'acb-hbtn';
+  playBtn.dataset.a = 'play';
+  playBtn.textContent = '▶';
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'acb-hbtn';
+  removeBtn.dataset.a = 'remove';
+  removeBtn.textContent = '✕';
+  btns.appendChild(playBtn);
+  btns.appendChild(removeBtn);
+
+  const body = document.createElement('div');
+  body.className = 'acb-cursor-body dim';
+  const svgWrap = document.createElement('div');
+  svgWrap.style.cssText = 'display:contents';
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(cursorSVG(color), 'image/svg+xml');
+  svgWrap.appendChild(svgDoc.documentElement);
+  const label = document.createElement('div');
+  label.className = 'acb-cursor-label';
+  label.textContent = 'T' + (index + 1);
+  body.appendChild(svgWrap);
+  body.appendChild(label);
+
+  el.appendChild(btns);
+  el.appendChild(body);
 
   makeDraggable(el, id, false);
-  el.querySelector('[data-a="play"]').addEventListener('click', e => { e.stopPropagation(); toggleTargetActive(id); });
-  el.querySelector('[data-a="remove"]').addEventListener('click', e => { e.stopPropagation(); removeTarget(id); });
+  playBtn.addEventListener('click',   e => { e.stopPropagation(); toggleTargetActive(id); });
+  removeBtn.addEventListener('click', e => { e.stopPropagation(); removeTarget(id); });
   return el;
 }
 
@@ -195,7 +214,11 @@ function buildDotEl(id, x, y, color, index) {
   el.className = 'acb-target acb-dot acb-inactive';
   el.dataset.acbId = id;
   el.style.cssText = `left:${x}px;top:${y}px;--c:${color};`;
-  el.innerHTML = `<span class="acb-dot-inner">T${index+1}</span>`;
+  el.innerHTML = '';
+  const inner = document.createElement('span');
+  inner.className = 'acb-dot-inner';
+  inner.textContent = 'T' + (index + 1);
+  el.appendChild(inner);
   makeDraggable(el, id, true);
   let pressTimer;
   el.addEventListener('touchstart', () => { pressTimer = setTimeout(() => showDotMenu(id, el), 600); }, {passive:true});
@@ -210,9 +233,18 @@ function showDotMenu(id, el) {
   const t = state.targets.find(t => t.id === id);
   const m = document.createElement('div');
   m.className = 'acb-dot-menu';
-  m.innerHTML = `<button class="acb-hbtn" data-a="play">${t && t.active ? '⏸' : '▶'}</button><button class="acb-hbtn" data-a="remove">✕</button>`;
-  m.querySelector('[data-a="play"]').addEventListener('click',   () => { toggleTargetActive(id); m.remove(); });
-  m.querySelector('[data-a="remove"]').addEventListener('click', () => removeTarget(id));
+  const playBtn = document.createElement('button');
+  playBtn.className = 'acb-hbtn';
+  playBtn.dataset.a = 'play';
+  playBtn.textContent = t && t.active ? '⏸' : '▶';
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'acb-hbtn';
+  removeBtn.dataset.a = 'remove';
+  removeBtn.textContent = '✕';
+  m.appendChild(playBtn);
+  m.appendChild(removeBtn);
+  playBtn.addEventListener('click',   () => { toggleTargetActive(id); m.remove(); });
+  removeBtn.addEventListener('click', () => removeTarget(id));
   el.appendChild(m);
 }
 
