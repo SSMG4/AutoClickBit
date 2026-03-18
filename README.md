@@ -65,9 +65,9 @@ AutoClickBit is a browser extension that lets you place one or more click target
 
 | Browser | Status | Notes |
 |---|---|---|
-| Chrome 109+ | Full | Manifest V3 |
-| Firefox 109+ (Desktop) | Full | Manifest V3 |
-| Firefox 120+ (Android) | Full | Dots instead of cursors |
+| Chrome 109+ | Soon | Manifest V3 |
+| Firefox 140+ (Desktop) | [Available](https://addons.mozilla.org/en-US/firefox/addon/autoclickbit/) | Manifest V3 |
+| Firefox 142+ (Android) | [Available](https://addons.mozilla.org/en-US/firefox/addon/autoclickbit/) | Dots instead of cursors |
 | Edge 109+ | Full | Chromium-based |
 | Brave | Full | Chromium-based |
 | Opera | Full | Chromium-based |
@@ -81,7 +81,7 @@ AutoClickBit is a browser extension that lets you place one or more click target
 
 ### Extension stores
 
-Store listings are planned. Check the [releases page](https://github.com/AutoClickBit/AutoClickBit/releases) for current availability.
+Status available in [Browser Compatibility](#browser-compatibility). Check the [releases page](https://github.com/AutoClickBit/AutoClickBit/releases) as an alternative.
 
 ### Manual installation from source
 
